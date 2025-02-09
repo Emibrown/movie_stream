@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "57974663944",
+    "project_id": "video-stream-f073c",
+    "storage_bucket": "video-stream-f073c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:57974663944:android:bfcd4b8de5a1f7c32f1abd",
+        "android_client_info": {
+          "package_name": "com.stream"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbi5kIonAt0ftHTcwR5Hlr-SAy_HmAYdo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

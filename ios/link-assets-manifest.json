@@ -1,0 +1,17 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/Inter_24pt-Medium.ttf",
+      "sha1": "3b9f3360ca812f2076db0bfc8bed4cfdd951e74f"
+    },
+    {
+      "path": "assets/icons/icomoon.ttf",
+      "sha1": "0e02d7b52018748c435b986b5f20d9e85eef8a3b"
+    },
+    {
+      "path": "assets/icons/selection.json",
+      "sha1": "f03e541e85a9e13df35b7de4fd4e7b7a410fdf42"
+    }
+  ]
+}
