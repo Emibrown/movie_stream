@@ -256,31 +256,37 @@ export const CATEGORIES = [
         id: '1',
         title: 'Better Call Saul',
         cover: require('../assets/images/movie5.jpg'),
+        tag: 'Detective',
     },
     {
         id: '2',
         title: 'Landman',
         cover: require('../assets/images/young.jpg'),
+        tag: 'Detective',
     },
     {
         id: '3',
         title: 'The Boys',
         cover: require('../assets/images/groupers.jpg'),
+        tag: 'Detective',
     },
     {
         id: '4',
         title: 'Doctor House',
         cover: require('../assets/images/landman.jpg'),
+        tag: 'Detective',
     },
     {
         id: '5',
         title: 'Deadpool 3',
         cover: require('../assets/images/the_100.jpg'),
+        tag: 'Detective',
     },
     {
         id: '6',
         title: 'No Good Deed',
         cover: require('../assets/images/arcane.jpg'),
+        tag: 'Detective',
     },
 ];
 

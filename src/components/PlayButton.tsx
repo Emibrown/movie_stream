@@ -40,8 +40,10 @@ const styles = StyleSheet.create({
     button: {
         flexDirection: 'row',
         alignItems: 'center',
+        justifyContent: 'center',
         backgroundColor: '#FFFFFFE5',
         borderRadius: 8,
+        width: 122,
         paddingVertical: 10,
         paddingHorizontal: 40,
     },

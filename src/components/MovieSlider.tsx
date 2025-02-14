@@ -1,48 +1,98 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   View,
   FlatList,
   StyleSheet,
   Dimensions,
+  Text,
+  Animated,
 } from 'react-native';
 import SearchButton from './SearchButton';
 import MovieSliderItem from './MovieSliderItem';
 import { useVideoStore } from '../store/videoStore';
 import { MOVIE_SLIDER_DATA } from '../constants/movies';
 import { COLOR } from '../constants/colors';
+import PlayButton from './PlayButton';
+import { FONT } from '../constants/fonts';
+import { useIsFocused, useNavigation } from '@react-navigation/native';
 
 
-const { width, height } = Dimensions.get('window');
+const { height } = Dimensions.get('window');
 
 const MovieSlider = () => {
   const [activeIndex, setActiveIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
-  const { videos } = useVideoStore();
+  const { videos, setSelectedVideo } = useVideoStore();
+  const [movies, setMovies] = useState<any>([]);
+  const [currentTime, setCurrentTime] = useState(0);
+  const navigation = useNavigation<any>();
+  const fadeAnim = useRef(new Animated.Value(1)).current;
+  const isFocused = useIsFocused();
 
+
+  const handleVideoPress = useCallback(() => {
+    setSelectedVideo(movies[activeIndex]?.id, currentTime);
+    navigation.navigate('Shorts');
+  }, [activeIndex,movies, currentTime, navigation, setSelectedVideo]);
+
+
+  useEffect(() => {
+    // Fade out first
+    Animated.timing(fadeAnim, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start(() => {
+    // Update categories and fade back in
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    if(isFocused){
+      setCurrentTime(0);
+    }
+    });
+  }, [activeIndex, fadeAnim, isFocused]);
+
+  useEffect(() => {
+    setMovies(MOVIE_SLIDER_DATA.map(movie => ({
+      ...movie,
+      ...videos.find(video => video.id === movie.id),
+    })));
+  }, [videos]);
 
   return (
     <View style={styles.container}>
       <SearchButton onClick={() => {}} />
-
       <FlatList
         ref={flatListRef}
-        data={MOVIE_SLIDER_DATA.map(movie => ({
-          ...movie,
-          ...videos.find(video => video.id === movie.id),
-        }))}
+        data={movies}
         bounces={false}
         renderItem={({ item, index }) => (
-          <MovieSliderItem item={item} isActive={index === activeIndex} />
+          <MovieSliderItem item={item} isActive={index === activeIndex} onProgress={setCurrentTime} />
         )}
         keyExtractor={(item) => item.id}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={(event) => {
-          const index = Math.round(event.nativeEvent.contentOffset.x / width);
+        onMomentumScrollEnd={(event) => {
+          const index = Math.round(event.nativeEvent.contentOffset.x / event.nativeEvent.layoutMeasurement.width);
           setActiveIndex(index);
         }}
       />
+
+      <View style={styles.content}>
+        {/* Categories */}
+        <Animated.View style={[styles.categories, { opacity: fadeAnim }]}>
+          {movies[activeIndex]?.categories.map((category: any, index: number) => (
+            <Text key={index} style={styles.categoryText}>
+              {category}
+            </Text>
+          ))}
+        </Animated.View>
+        <PlayButton onClick={handleVideoPress} />
+      </View>
 
       {/* Pagination Dots */}
       <View style={styles.pagination}>
@@ -78,6 +128,30 @@ const styles = StyleSheet.create({
     height: 6,
     backgroundColor: COLOR.primary,
   },
+  content:{
+    position: 'absolute',
+    bottom: 2,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    width: '100%',
+  },
+  categories: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 105,
+},
+categoryText: {
+    borderWidth: 1,
+    borderColor: '#FFFFFF4D',
+    color: '#FFFFFF99',
+    fontWeight: '400',
+    fontFamily: FONT.inter,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginHorizontal: 5,
+    borderRadius: 8,
+    fontSize: 14,
+},
 });
 
 export default MovieSlider;
