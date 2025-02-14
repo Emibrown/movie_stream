@@ -41,28 +41,31 @@ const MovieSliderItem = ({ item, isActive, onProgress }: { item: any; isActive: 
 
   return (
     <View style={styles.slide}>
-      {isActive && showVideo && item.videoUrl ? (
-        <Video
-          ref={videoRef}
-          source={{ uri: item.videoUrl }}
-          style={styles.video}
-          resizeMode="cover"
-          paused={paused}
-          repeat
-          muted
-          onLoadStart={() => setLoading(true)}
-          onLoad={() => setLoading(false)}
-          controls={false}
-          onProgress={(progress) => onProgress && onProgress(progress.currentTime)}
-        />
-      ) : (
-        <Image source={item.image} resizeMode="cover" style={styles.image}/>
-      )}
+      {
+        isActive && item.videoUrl && (
+          <Video
+            ref={videoRef}
+            source={{ uri: item.videoUrl }}
+            style={styles.video}
+            resizeMode="cover"
+            paused={paused}
+            repeat
+            muted
+            onLoadStart={() => setLoading(true)}
+            onLoad={() => setLoading(false)}
+            controls={false}
+            onProgress={(progress) => onProgress && onProgress(progress.currentTime)}
+          />
+        )
+      }
       {
         loading && <View style={styles.loader}>
         <ActivityIndicator size={20} color={COLOR.primary} />
       </View>
       }
+      {!showVideo && (
+        <Image source={item.image} resizeMode="cover" style={styles.image}/>
+      )}
       <View style={styles.content}>
         <LinearGradient colors={['rgba(0,0,0,0.8)', 'transparent', 'rgba(0,0,0,1)']} style={styles.gradient} />
 
@@ -87,6 +90,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'black',
   },
   image: {
+    position: 'absolute',
+    top: 0,
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',
