@@ -5,7 +5,6 @@ import {
   StyleSheet,
   Dimensions,
   Text,
-  Animated,
 } from 'react-native';
 import SearchButton from './SearchButton';
 import MovieSliderItem from './MovieSliderItem';
@@ -14,7 +13,8 @@ import { MOVIE_SLIDER_DATA } from '../constants/movies';
 import { COLOR } from '../constants/colors';
 import PlayButton from './PlayButton';
 import { FONT } from '../constants/fonts';
-import { useIsFocused, useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
+import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanimated';
 
 
 const { height } = Dimensions.get('window');
@@ -26,34 +26,12 @@ const MovieSlider = () => {
   const [movies, setMovies] = useState<any>([]);
   const [currentTime, setCurrentTime] = useState(0);
   const navigation = useNavigation<any>();
-  const fadeAnim = useRef(new Animated.Value(1)).current;
-  const isFocused = useIsFocused();
-
+  const videoShowing = useSharedValue(1);
 
   const handleVideoPress = useCallback(() => {
     setSelectedVideo(movies[activeIndex]?.id, currentTime);
     navigation.navigate('Shorts');
   }, [activeIndex,movies, currentTime, navigation, setSelectedVideo]);
-
-
-  useEffect(() => {
-    // Fade out first
-    Animated.timing(fadeAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start(() => {
-    // Update categories and fade back in
-    Animated.timing(fadeAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-    if(isFocused){
-      setCurrentTime(0);
-    }
-    });
-  }, [activeIndex, fadeAnim, isFocused]);
 
   useEffect(() => {
     setMovies(MOVIE_SLIDER_DATA.map(movie => ({
@@ -61,6 +39,10 @@ const MovieSlider = () => {
       ...videos.find(video => video.id === movie.id),
     })));
   }, [videos]);
+
+  const tagsStyle = useAnimatedStyle(() => ({
+    opacity: videoShowing.value,
+  }));
 
   return (
     <View style={styles.container}>
@@ -70,7 +52,7 @@ const MovieSlider = () => {
         data={movies}
         bounces={false}
         renderItem={({ item, index }) => (
-          <MovieSliderItem item={item} isActive={index === activeIndex} onProgress={setCurrentTime} />
+          <MovieSliderItem setVideoShowing={videoShowing} item={item} isActive={index === activeIndex} onProgress={setCurrentTime} />
         )}
         keyExtractor={(item) => item.id}
         horizontal
@@ -84,7 +66,7 @@ const MovieSlider = () => {
 
       <View style={styles.content}>
         {/* Categories */}
-        <Animated.View style={[styles.categories, { opacity: fadeAnim }]}>
+        <Animated.View style={[styles.categories, tagsStyle]}>
           {movies[activeIndex]?.categories.map((category: any, index: number) => (
             <Text key={index} style={styles.categoryText}>
               {category}

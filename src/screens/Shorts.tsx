@@ -8,7 +8,7 @@ import { COLOR } from '../constants/colors';
 const Shorts = () => {
   const [activeVideo, setActiveVideo] = useState<string | null>(null);
   const viewConfigRef = useRef({ viewAreaCoveragePercentThreshold: 50 });
-  const { selectedVideoId, videoProgress, videos } = useVideoStore();
+  const { selectedVideoId, videos } = useVideoStore();
   const [height, setHeight] = useState(0);
   const listRef = useRef<FlatList<any>>(null);
   const [isListRendered, setIsListRendered] = useState(false);
@@ -44,7 +44,7 @@ const Shorts = () => {
         bounces={false}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <VideoItem item={item} videoHeight={height} videoProgress={videoProgress!} isActive={activeVideo === item.id} />
+          <VideoItem item={item} videoHeight={height} isActive={activeVideo === item.id} />
         )}
         getItemLayout={(data, index) => ({
           length: height,

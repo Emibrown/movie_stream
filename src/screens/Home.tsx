@@ -1,5 +1,5 @@
 import React from 'react';
-import {FlatList, StyleSheet, View} from 'react-native';
+import {FlatList, StatusBar, StyleSheet, View} from 'react-native';
 import MovieSlider from '../components/MovieSlider';
 import Title from '../components/Title';
 import SmallMovieCard from '../components/SmallMovieCard';
@@ -56,14 +56,21 @@ const RenderSection = ({ section }: any) => {
 
 export default function Home() {
   return (
-    <FlatList
-      style={{backgroundColor: 'black'}}
-      data={HOME_DATA}
-      keyExtractor={(item) => item.id}
-      ListHeaderComponent={MovieSlider}
-      renderItem={({ item }) => <RenderSection section={item} />}
-      showsVerticalScrollIndicator={false}
-    />
+    <>
+      <StatusBar
+        backgroundColor="transparent"
+        barStyle={'light-content'}
+        translucent={true}
+      />
+      <FlatList
+        style={{backgroundColor: 'black'}}
+        data={HOME_DATA}
+        keyExtractor={(item) => item.id}
+        ListHeaderComponent={MovieSlider}
+        renderItem={({ item }) => <RenderSection section={item} />}
+        showsVerticalScrollIndicator={false}
+      />
+    </>
   );
 }
 

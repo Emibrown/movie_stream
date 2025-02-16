@@ -1,46 +1,73 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Dimensions, Image, ActivityIndicator} from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { View, StyleSheet, Dimensions, Image, TouchableOpacity} from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Video, { VideoRef } from 'react-native-video';
 import { useIsFocused} from '@react-navigation/native';
 import { FONT } from '../constants/fonts';
-import { COLOR } from '../constants/colors';
+import Animated, { SharedValue, useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
-const MovieSliderItem = ({ item, isActive, onProgress }: { item: any; isActive: boolean; onProgress?: (progress: number) => void}) => {
+const MovieSliderItem = ({
+  item,
+  isActive,
+  setVideoShowing,
+  onProgress,
+}: {
+  item: any;
+  isActive: boolean;
+  setVideoShowing: SharedValue<number>;
+  onProgress?: (progress: number) => void
+}) => {
   const [showVideo, setShowVideo] = useState(false);
   const isFocused = useIsFocused();
   const videoRef = useRef<VideoRef>(null);
   const [paused, setPaused] = useState(true);
-  const [loading, setLoading] = useState(false);
-  // const fadeAnim = useRef(new Animated.Value(isActive ? 1 : 0)).current;
-
-  // useEffect(() => {
-  //   Animated.timing(fadeAnim, {
-  //     toValue: isActive ? 1 : 0, // Fade in when active, fade out otherwise
-  //     duration: 500,
-  //     useNativeDriver: true,
-  //   }).start();
-  // }, [isActive, fadeAnim]);
+  const [muted, setMuted] = useState(true);
+  const [delayComplete, setDelayComplete] = useState(false);
+  const opacity = useSharedValue(1);
 
   useEffect(() => {
-    if (isFocused && isActive) {
+    if (isActive) {
+      setDelayComplete(false);
+      const delayTimer = setTimeout(() => {
+        setDelayComplete(true);
+      }, 5000);
+      return () => clearTimeout(delayTimer);
+    }else{
+      setDelayComplete(false);
       setShowVideo(false);
+    }
+  }, [isActive, setVideoShowing]);
+
+  useEffect(() => {
+    if (isFocused && isActive && delayComplete && showVideo) {
       setPaused(false);
-      videoRef.current?.seek(0);
       const timer = setTimeout(() => {
         setShowVideo(true);
-      }, 3000);
+        opacity.value = withTiming(0, { duration: 1000 });
+        setVideoShowing.value = withTiming(0, { duration: 1000 });
+      }, 0);
       return () => clearTimeout(timer);
     } else {
-      setShowVideo(false);
+      opacity.value = 1;
+      setVideoShowing.value = withTiming(1, { duration: 1000 });
       setPaused(true);
     }
-  }, [isActive, isFocused]);
+  }, [isActive, isFocused, setVideoShowing, delayComplete, showVideo, opacity]);
+
+  const muteAction = useCallback(() => {
+    if(showVideo){
+      setMuted(!muted);
+    }
+  }, [muted, showVideo]);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    opacity: opacity.value,
+  }));
 
   return (
-    <View style={styles.slide}>
+    <TouchableOpacity activeOpacity={1} onPress={muteAction}  style={styles.slide}>
       {
         isActive && item.videoUrl && (
           <Video
@@ -50,22 +77,19 @@ const MovieSliderItem = ({ item, isActive, onProgress }: { item: any; isActive: 
             resizeMode="cover"
             paused={paused}
             repeat
-            muted
-            onLoadStart={() => setLoading(true)}
-            onLoad={() => setLoading(false)}
+            muted={muted}
+            // onLoad={() => {
+            //   setShowVideo(true);
+            // }}
+            onReadyForDisplay={() => setShowVideo(true)}
             controls={false}
             onProgress={(progress) => onProgress && onProgress(progress.currentTime)}
           />
         )
       }
-      {
-        loading && <View style={styles.loader}>
-        <ActivityIndicator size={20} color={COLOR.primary} />
-      </View>
-      }
-      {!showVideo && (
+      <Animated.View style={[styles.imageContainer, animatedStyle]}>
         <Image source={item.image} resizeMode="cover" style={styles.image}/>
-      )}
+      </Animated.View>
       <View style={styles.content}>
         <LinearGradient colors={['rgba(0,0,0,0.8)', 'transparent', 'rgba(0,0,0,1)']} style={styles.gradient} />
 
@@ -77,7 +101,7 @@ const MovieSliderItem = ({ item, isActive, onProgress }: { item: any; isActive: 
           ))}
         </Animated.View> */}
       </View>
-    </View>
+    </TouchableOpacity>
   );
 };
 
@@ -89,9 +113,13 @@ const styles = StyleSheet.create({
     height: height * 0.73,
     backgroundColor: 'black',
   },
-  image: {
+  imageContainer:{
     position: 'absolute',
     top: 0,
+    width: '100%',
+    height: '100%',
+  },
+  image: {
     flex: 1,
     justifyContent: 'flex-end',
     alignItems: 'center',

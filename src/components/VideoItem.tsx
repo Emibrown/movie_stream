@@ -19,7 +19,7 @@ const formatTime = (seconds: number) => {
   return `${min}:${sec < 10 ? '0' : ''}${sec}`;
 };
 
-const VideoItem = ({ item, videoHeight, isActive, videoProgress }: { item: any; videoHeight: number; isActive: boolean; videoProgress?: number }) => {
+const VideoItem = ({ item, videoHeight, isActive }: { item: any; videoHeight: number; isActive: boolean;}) => {
   const videoRef = useRef<VideoRef>(null);
   const [paused, setPaused] = useState(false);
   const [like, setLike] = useState(false);
@@ -31,7 +31,7 @@ const VideoItem = ({ item, videoHeight, isActive, videoProgress }: { item: any; 
   const [lastProgress, setLastProgress] = useState(0);
   const isDragging = useSharedValue(0);
   const uiOpacity = useSharedValue(1);
-  const { selectedVideoId, setSelectedVideo } = useVideoStore();
+  const { selectedVideoId, videoProgress, setSelectedVideo } = useVideoStore();
 
   const hideUITimer = useRef<any>(null);
 
@@ -71,8 +71,8 @@ const VideoItem = ({ item, videoHeight, isActive, videoProgress }: { item: any; 
     useCallback(() => {
       resetUITimer();
       setPaused(!isActive);
-      if(selectedVideoId){
-        seekTo(videoProgress!);
+      if(selectedVideoId && isActive){
+        seekTo(videoProgress || 0);
         setSelectedVideo('');
       }
       return () => setPaused(true);
@@ -84,11 +84,10 @@ const VideoItem = ({ item, videoHeight, isActive, videoProgress }: { item: any; 
     videoRef.current?.seek(newTime);
     isDragging.value = withTiming(0, { duration: 300 });
     setLastProgress(progress.value);
-    resetUITimer();
     if(paused){
       clearTimeout(hideUITimer.current);
     }
-  }, [isDragging, paused, progress.value, duration, resetUITimer]);
+  }, [isDragging, paused, progress.value, duration]);
 
   const updateDisplayedTime = useCallback((newProgress: number) => {
     // Update displayed time
